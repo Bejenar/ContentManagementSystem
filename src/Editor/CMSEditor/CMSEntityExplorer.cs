@@ -19,8 +19,8 @@ namespace Editor.CMSEditor
     
     public class CMSEntityExplorer : EditorWindow
     {
-        public const string TemplatesFolder = "Assets/Resources/CMS/Templates";
-        private const string SearchPath = "Assets/Resources";
+        public const string TemplatesFolder = "Assets/_Project/Resources/CMS/Templates";
+        private const string SearchPath = "Assets/_Project/Resources";
         private const string SearchControlName = "CMSSearchField";
         private bool _focusFirstItemNextFrame;
 

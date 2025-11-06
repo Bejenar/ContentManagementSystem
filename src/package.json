@@ -1,12 +1,12 @@
 {
-  "name": "com.megurte.cms",
-  "version": "1.4.1",
+  "name": "com.ranejeb.cms",
+  "version": "1.4.2",
   "displayName": "Content Management System",
   "description": "A modular CMS plugin for Unity. Allows defining and editing structured game data in the editor.",
-  "unity": "2022.3",
+  "unity": "6000.0",
   "author": {
-    "name": "megurt",
-    "url": "https://github.com/megurte"
+    "name": "ranejeb",
+    "url": "https://github.com/Bejenar"
   },
   "keywords": [
     "unity",
