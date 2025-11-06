@@ -24,7 +24,7 @@ Or use UPM installation:
 3. Paste link to package: 
 
 ```
-https://github.com/megurte/ContentManagementSystem.git?path=/src#1.4.1
+https://github.com/bejenar/ContentManagementSystem.git?path=/src#1.4.2
 ```
 
 ## Usage
