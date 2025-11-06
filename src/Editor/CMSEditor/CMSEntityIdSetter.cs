@@ -8,7 +8,7 @@ namespace Editor.CMSEditor
         [MenuItem("CMS/Auto-Fill IDs")]
         public static void AutoFillCMSIds()
         {
-			var guids = AssetDatabase.FindAssets("t:GameObject", new[] { CMS.CMSPaths.CMSRoot });
+			var guids = AssetDatabase.FindAssets("t:GameObject", new[] { CMSPaths.CMSRoot });
             var updatedCount = 0;
 
             foreach (var guid in guids)
@@ -31,7 +31,7 @@ namespace Editor.CMSEditor
                     continue;
                 }
 
-				if (!path.StartsWith(CMS.CMSPaths.ResourcesRoot) || !path.EndsWith(".prefab"))
+				if (!path.StartsWith(CMSPaths.ResourcesRoot) || !path.EndsWith(".prefab"))
                 {
                     Debug.LogWarning($"Prefab not in Resources or not a .prefab: {path}");
                     continue;
@@ -53,7 +53,7 @@ namespace Editor.CMSEditor
 
         public static string FormatEntityId(string path)
         {
-			var relativePath = path.Substring(CMS.CMSPaths.ResourcesRoot.Length);
+			var relativePath = path.Substring(CMSPaths.ResourcesRoot.Length);
             return relativePath.Substring(0, relativePath.Length - ".prefab".Length);
         }
 

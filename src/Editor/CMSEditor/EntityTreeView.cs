@@ -148,7 +148,7 @@ namespace src.Editor.CMSEditor
             foreach (var result in _searchResults)
             {
                 var assetPath = AssetDatabase.GetAssetPath(result.prefab);
-				var relativePath = assetPath.Replace(CMS.CMSPaths.CMSPrefabs, "").Replace(".prefab", "");
+				var relativePath = assetPath.Replace(CMSPaths.CMSPrefabs, "").Replace(".prefab", "");
                 var parts = relativePath.Split('/');
 
                 var currentPath = "";

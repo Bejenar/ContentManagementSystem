@@ -24,7 +24,7 @@ namespace Editor.CMSEditor
 
             if (GUI.Button(buttonRect, "\ud83d\uddc2\ufe0f"))
             {
-				var prefabs = AssetDatabase.FindAssets("t:GameObject", new[] { CMS.CMSPaths.CMSRoot });
+				var prefabs = AssetDatabase.FindAssets("t:GameObject", new[] { CMSPaths.CMSRoot });
                 var allPrefabs = prefabs
                     .Select(guid => AssetDatabase.GUIDToAssetPath(guid))
                     .Select(path => AssetDatabase.LoadAssetAtPath<GameObject>(path))

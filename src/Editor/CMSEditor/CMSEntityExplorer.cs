@@ -19,8 +19,8 @@ namespace Editor.CMSEditor
     
     public class CMSEntityExplorer : EditorWindow
     {
-        public const string TemplatesFolder = $"{CMS.CMSPaths.CMSRoot}/Templates";
-        private const string SearchPath = $"{CMS.CMSPaths.ResourcesRoot}";
+        public const string TemplatesFolder = $"{CMSPaths.CMSRoot}/Templates";
+        private const string SearchPath = $"{CMSPaths.ResourcesRoot}";
         private const string SearchControlName = "CMSSearchField";
         private bool _focusFirstItemNextFrame;
 
@@ -318,7 +318,7 @@ namespace Editor.CMSEditor
                 }
             }
 
-			return CMS.CMSPaths.CMSRoot;
+			return CMSPaths.CMSRoot;
         }
         
         private void SaveTemplate(CMSEntityPfb entity)
