@@ -1,19 +1,28 @@
 ﻿using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
+using UnityEditor.UIElements;
 
 namespace src.Editor.CMSEditor
 {
     [CustomEditor(typeof(CMSEntityPfb))]
     public class CMSEntityPfbEditor : UnityEditor.Editor
     {
-        public override void OnInspectorGUI()
+        public override VisualElement CreateInspectorGUI()
         {
+            var root = new VisualElement();
+            
             var entity = (CMSEntityPfb)target;
             var entitySprite = entity.GetSprite();
 
             if (entitySprite != null)
             {
-                GUILayout.Label("Entity Icon", EditorStyles.boldLabel);
+                var spriteContainer = new VisualElement();
+                spriteContainer.AddToClassList("sprite-preview-container");
+                
+                var label = new Label("Entity Icon");
+                label.AddToClassList("sprite-preview-label");
+                spriteContainer.Add(label);
 
                 var pixelsPerUnit = entitySprite.pixelsPerUnit;
                 var width = entitySprite.rect.width / pixelsPerUnit;
@@ -22,18 +31,24 @@ namespace src.Editor.CMSEditor
                 var previewHeight = 124f;
                 var previewWidth = previewHeight * aspectRatio;
 
-                var spriteRect = GUILayoutUtility.GetRect(previewWidth, previewHeight, GUILayout.ExpandWidth(false));
-                var uv = new Rect(
-                    entitySprite.textureRect.x / entitySprite.texture.width,
-                    entitySprite.textureRect.y / entitySprite.texture.height,
-                    entitySprite.textureRect.width / entitySprite.texture.width,
-                    entitySprite.textureRect.height / entitySprite.texture.height
-                );
-
-                GUI.DrawTextureWithTexCoords(spriteRect, entitySprite.texture, uv);
+                // Create an Image element for the sprite
+                var spriteImage = new Image
+                {
+                    sprite = entitySprite,
+                    scaleMode = ScaleMode.ScaleToFit
+                };
+                spriteImage.AddToClassList("sprite-preview-image");
+                spriteImage.style.width = previewWidth;
+                spriteImage.style.height = previewHeight;
+                
+                spriteContainer.Add(spriteImage);
+                root.Add(spriteContainer);
             }
 
-            DrawDefaultInspector();
+            // Add default inspector for remaining properties
+            InspectorElement.FillDefaultInspector(root, serializedObject, this);
+            
+            return root;
         }
     }
 }

@@ -1,4 +1,11 @@
-﻿using System;
+﻿﻿// ========================================
+// OBSOLETE: This file is no longer used after UI Toolkit migration
+// The tree view functionality has been integrated directly into CMSEntityExplorer.cs
+// using UI Toolkit's TreeView and ListView controls.
+// This file is kept for reference only and can be safely deleted.
+// ========================================
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,6 +16,7 @@ using UnityEngine;
 
 namespace src.Editor.CMSEditor
 {
+    [System.Obsolete("This class is no longer used. TreeView functionality has been integrated into CMSEntityExplorer with UI Toolkit.")]
     public class EntityTreeViewItem : TreeViewItem
     {
         public GameObject prefab;
@@ -22,6 +30,7 @@ namespace src.Editor.CMSEditor
         public string path;
     }
     
+    [System.Obsolete("This class is no longer used. TreeView functionality has been integrated into CMSEntityExplorer with UI Toolkit.")]
     public class EntityTreeView : TreeView
     {
         public bool IsRenaming => _renameId > 0;

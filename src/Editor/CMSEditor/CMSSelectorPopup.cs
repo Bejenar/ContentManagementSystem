@@ -4,6 +4,7 @@ using System.Linq;
 using src.Editor.CMSEditor.Utils;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Editor.CMSEditor
 {
@@ -14,8 +15,10 @@ namespace Editor.CMSEditor
         private List<CMSEntityPfb> _prefabs;
         private string _searchQuery = "";
         private Action<CMSEntityPfb> _onSelected;
-        private Vector2 _scrollPos;
         private CMSEntityPfb _currentSelected;
+        private TextField _searchField;
+        private ScrollView _scrollView;
+        private VisualElement _contentContainer;
 
         public static void Show(List<CMSEntityPfb> prefabs, CMSEntityPfb currentSelection, Action<CMSEntityPfb> onSelected)
         {
@@ -34,56 +37,107 @@ namespace Editor.CMSEditor
             _currentWindow = window;
         }
 
-        private void OnGUI()
+        private void CreateGUI()
         {
-            this.DrawWindowBorder();
+            var root = rootVisualElement;
             
-            EditorGUILayout.BeginHorizontal();
-            GUI.SetNextControlName("SearchField");
-            _searchQuery = EditorGUILayout.TextField(_searchQuery, GUI.skin.FindStyle("ToolbarSearchTextField"));
-            if (GUILayout.Button("X", GUILayout.Width(20)))
-                Close();
-            EditorGUILayout.EndHorizontal();
+            // Load UXML
+            var visualTree = EditorCustomTools.LoadUXML("CMSSelectorPopup");
+            root.Add(visualTree);
+            
+            // Load stylesheet
+            EditorCustomTools.LoadAndApplyStyleSheet(root, "CMSEditorStyles");
 
-            _scrollPos = EditorGUILayout.BeginScrollView(_scrollPos);
+            // Get references
+            _searchField = root.Q<TextField>("search-field");
+            _scrollView = root.Q<ScrollView>("scroll-view");
+            _contentContainer = root.Q<VisualElement>("content-container");
+            var closeButton = root.Q<Button>("btn-close");
+
+            // Setup event handlers
+            _searchField.RegisterValueChangedCallback(evt =>
+            {
+                _searchQuery = evt.newValue;
+                RebuildList();
+            });
+
+            closeButton.clicked += Close;
+
+            // Handle Escape key
+            root.RegisterCallback<KeyDownEvent>(evt =>
+            {
+                if (evt.keyCode == KeyCode.Escape)
+                {
+                    Close();
+                    evt.StopPropagation();
+                }
+            });
+
+            // Initial build
+            RebuildList();
+            
+            // Focus search field
+            _searchField.Focus();
+        }
+
+        private void RebuildList()
+        {
+            _contentContainer.Clear();
 
             var filtered = string.IsNullOrEmpty(_searchQuery)
                 ? _prefabs
                 : _prefabs.Where(p => p.name.ToLower().Contains(_searchQuery.ToLower())).ToList();
 
             foreach (var prefab in filtered)
-                DrawSelectableRow(prefab);
-
-            EditorGUILayout.EndScrollView();
+            {
+                CreateSelectableRow(prefab);
+            }
         }
 
-        private void DrawSelectableRow(CMSEntityPfb prefab)
+        private void CreateSelectableRow(CMSEntityPfb prefab)
         {
-            var rect = GUILayoutUtility.GetRect(new GUIContent(prefab.name), EditorStyles.label, GUILayout.ExpandWidth(true));
-
-            bool isHovered = rect.Contains(Event.current.mousePosition);
-
+            var row = new VisualElement();
+            row.AddToClassList("selector-row");
+            
             if (_currentSelected == prefab)
             {
-                EditorGUI.DrawRect(rect, new Color(0.25f, 0.5f, 1f, 0.5f));
-            }
-            else if (isHovered)
-            {
-                EditorGUI.DrawRect(rect, new Color(1f, 1f, 1f, 0.05f));
+                row.AddToClassList("selector-row-selected");
             }
 
-            var labelRect = new Rect(rect.x + 8, rect.y, rect.width - 8, rect.height);
-            EditorGUI.LabelField(labelRect, prefab.name, style: GlobalStyles.TemplateStyle);
+            var label = new Label(prefab.name);
+            label.AddToClassList("template-label");
+            row.Add(label);
 
-            // Handle mouse click
-            if (Event.current.type == EventType.MouseDown && rect.Contains(Event.current.mousePosition))
+            // Handle click
+            row.RegisterCallback<MouseDownEvent>(evt =>
             {
                 _onSelected?.Invoke(prefab);
                 Close();
-                Event.current.Use();
-            }
+                evt.StopPropagation();
+            });
+
+            // Handle hover
+            row.RegisterCallback<MouseEnterEvent>(evt =>
+            {
+                if (_currentSelected != prefab)
+                {
+                    row.AddToClassList("selector-row");
+                }
+            });
+
+            row.RegisterCallback<MouseLeaveEvent>(evt =>
+            {
+                if (_currentSelected != prefab)
+                {
+                    row.RemoveFromClassList("selector-row");
+                }
+            });
+
+            _contentContainer.Add(row);
             
-            this.DrawLineBetween();
+            // Add separator
+            var separator = EditorCustomTools.CreateSeparator();
+            _contentContainer.Add(separator);
         }
         
         private void OnDestroy()

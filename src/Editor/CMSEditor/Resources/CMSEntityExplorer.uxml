@@ -1,0 +1,17 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="True">
+    <Style src="project://database/Assets/_Project/Packages/src/Editor/CMSEditor/Resources/CMSEditorStyles.uss?fileID=7433441132597879392&amp;guid=PLACEHOLDER&amp;type=3#CMSEditorStyles" />
+    <ui:VisualElement name="root" style="flex-grow: 1;">
+        <ui:VisualElement name="toolbar" class="cms-toolbar" style="flex-shrink: 0;">
+            <ui:Button text="Add" name="btn-add" class="cms-toolbar-button" />
+            <ui:Button text="Delete" name="btn-delete" class="cms-toolbar-button" />
+            <ui:Button text="Use Template" name="btn-use-template" class="cms-toolbar-button" />
+            <ui:Button text="Save Template" name="btn-save-template" class="cms-toolbar-button" />
+        </ui:VisualElement>
+        <ui:VisualElement name="search-container" class="cms-search-container" style="flex-shrink: 0;">
+            <ui:TextField name="search-field" class="cms-search-field" />
+            <ui:Button text="×" name="btn-clear-search" class="cms-clear-button" style="display: none;" />
+        </ui:VisualElement>
+        <ui:VisualElement name="tree-container" style="flex-grow: 1;" />
+    </ui:VisualElement>
+</ui:UXML>
+

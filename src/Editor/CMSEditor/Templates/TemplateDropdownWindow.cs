@@ -6,6 +6,7 @@ using Editor.CMSEditor;
 using src.Editor.CMSEditor.Utils;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace src.Editor.CMSEditor.Templates
 {
@@ -13,9 +14,9 @@ namespace src.Editor.CMSEditor.Templates
     {
         private string _templatesFolder => CMSEntityExplorer.TemplatesFolder;
         private Action<string> _onTemplateSelected;
-
-        private List<string> _templateNames;
-        private Vector2 _scroll;
+        private List<TemplateEntry> _entries;
+        private ScrollView _scrollView;
+        private VisualElement _contentContainer;
         private static Rect _alignTo;
         
         private class TemplateEntry
@@ -23,9 +24,6 @@ namespace src.Editor.CMSEditor.Templates
             public string name;
             public Texture2D icon;
         }
-        
-        private List<TemplateEntry> _entries;
-        private string _hoveredItem;
 
         public static void Show(Rect alignTo, Action<string> onTemplateSelected)
         {
@@ -48,8 +46,8 @@ namespace src.Editor.CMSEditor.Templates
             const int maxVisibleRows = 10;
             var count = window._entries?.Count ?? 0;
             var visibleRows = Mathf.Min(count, maxVisibleRows);
-            var height = visibleRows * rowHeight;
-            return height;
+            var height = visibleRows * rowHeight + 20; // Add padding
+            return Mathf.Max(height, 60); // Minimum height for "no templates" message
         }
 
         private void LoadTemplates()
@@ -66,102 +64,138 @@ namespace src.Editor.CMSEditor.Templates
             }
         }
         
-        private void OnGUI()
+        private void CreateGUI()
         {
-            this.DrawWindowBorder();
-
-            if (HandleTemplateAbsence()) return;     
+            var root = rootVisualElement;
             
-            _scroll = EditorGUILayout.BeginScrollView(_scroll);
+            // Create a bordered container
+            var container = EditorCustomTools.CreateBorderedContainer();
+            container.style.flexGrow = 1;
+            root.Add(container);
+            
+            // Load stylesheet
+            EditorCustomTools.LoadAndApplyStyleSheet(root, "CMSEditorStyles");
+
+            if (_entries == null || _entries.Count == 0)
+            {
+                ShowNoTemplatesMessage(container);
+                return;
+            }
+
+            _scrollView = new ScrollView();
+            _scrollView.style.flexGrow = 1;
+            container.Add(_scrollView);
+
+            _contentContainer = new VisualElement();
+            _scrollView.Add(_contentContainer);
+
+            BuildTemplateList();
+        }
+
+        private void ShowNoTemplatesMessage(VisualElement container)
+        {
+            var label = new Label("No saved templates");
+            label.style.unityTextAlign = TextAnchor.MiddleCenter;
+            label.style.unityFontStyleAndWeight = FontStyle.Italic;
+            label.style.color = new Color(0.6f, 0.6f, 0.6f);
+            label.style.flexGrow = 1;
+            label.style.marginTop = 10;
+            container.Add(label);
+        }
+
+        private void BuildTemplateList()
+        {
+            _contentContainer.Clear();
 
             foreach (var entry in _entries.ToList())
             {
-                var rect = EditorGUILayout.BeginHorizontal();
-                HandleHover(rect, entry);
-
-                DrawIconPrefab();
-                DrawTemplateName(entry);
-                var rowRect = GUILayoutUtility.GetLastRect();
-                var deletePressed = DrawDeleteButton(entry);
+                var row = CreateTemplateRow(entry);
+                _contentContainer.Add(row);
                 
-                EditorGUILayout.EndHorizontal();
-
-                this.DrawLineBetween();
-                
-                HandleMouseClick(deletePressed, rowRect, entry);
+                // Add separator
+                var separator = EditorCustomTools.CreateSeparator();
+                _contentContainer.Add(separator);
             }
-
-            EditorGUILayout.EndScrollView();
         }
 
-        private bool HandleTemplateAbsence()
+        private VisualElement CreateTemplateRow(TemplateEntry entry)
         {
-            if (_entries == null || _entries.Count == 0)
+            var row = new VisualElement();
+            row.AddToClassList("template-item");
+            row.style.flexDirection = FlexDirection.Row;
+            row.style.alignItems = Align.Center;
+            row.style.paddingLeft = 8;
+            row.style.paddingRight = 8;
+            row.style.paddingTop = 4;
+            row.style.paddingBottom = 4;
+
+            // Icon
+            var prefabIcon = EditorGUIUtility.IconContent("Prefab Icon").image as Texture2D;
+            var icon = new Image { image = prefabIcon };
+            icon.AddToClassList("template-icon");
+            icon.style.width = 20;
+            icon.style.height = 20;
+            icon.style.marginRight = 8;
+            row.Add(icon);
+
+            // Label
+            var label = new Label(entry.name);
+            label.AddToClassList("template-label");
+            label.style.flexGrow = 1;
+            row.Add(label);
+
+            // Delete button
+            var deleteButton = new Button(() => DeleteTemplate(entry))
             {
-                GUILayout.Space(2);
-                var labelStyle = new GUIStyle(EditorStyles.label)
-                {
-                    alignment = TextAnchor.MiddleCenter,
-                    fontStyle = FontStyle.Italic,
-                    normal = {textColor = new Color(0.6f, 0.6f, 0.6f)}
-                };
+                text = "×"
+            };
+            deleteButton.AddToClassList("cms-clear-button");
+            deleteButton.style.width = 16;
+            deleteButton.style.height = 16;
+            row.Add(deleteButton);
 
-                GUILayout.Label("No saved templates", labelStyle, GUILayout.ExpandHeight(true));
-                return true;
-            }
-
-            return false;
-        }
-
-        private void HandleMouseClick(bool deletePressed, Rect rowRect, TemplateEntry entry)
-        {
-            if (!deletePressed &&
-                Event.current.type == EventType.MouseDown &&
-                rowRect.Contains(Event.current.mousePosition))
+            // Handle hover
+            row.RegisterCallback<MouseEnterEvent>(evt =>
             {
-                Event.current.Use();
+                row.style.backgroundColor = new Color(0.2f, 0.4f, 0.6f, 0.3f);
+            });
+
+            row.RegisterCallback<MouseLeaveEvent>(evt =>
+            {
+                row.style.backgroundColor = Color.clear;
+            });
+
+            // Handle click
+            row.RegisterCallback<MouseDownEvent>(evt =>
+            {
                 _onTemplateSelected?.Invoke(entry.name);
-                GUIUtility.ExitGUI();
-            }
+                Close();
+                evt.StopPropagation();
+            });
+
+            return row;
         }
 
-        private void HandleHover(Rect rect, TemplateEntry entry)
+        private void DeleteTemplate(TemplateEntry entry)
         {
-            var isHover = rect.Contains(Event.current.mousePosition);
-            if (isHover) _hoveredItem = entry.name;
-
-            if (isHover)
-                EditorGUI.DrawRect(rect, new Color(0.2f, 0.4f, 0.6f, 0.3f));
-        }
-
-        private static void DrawIconPrefab()
-        {
-            var prefabIcon = EditorGUIUtility.IconContent("Prefab Icon").image;
-            GUILayout.Label(prefabIcon, GUILayout.Width(20), GUILayout.Height(20));
-        }
-
-        private static void DrawTemplateName(TemplateEntry entry)
-        {
-            GUILayout.Space(4);
-            GUILayout.Label(entry.name, GlobalStyles.TemplateStyle, GUILayout.ExpandWidth(true));
-        }
-
-        private bool DrawDeleteButton(TemplateEntry entry)
-        {
-            if (GUILayout.Button("×", GlobalStyles.ClearButtonStyle))
+            if (EditorUtility.DisplayDialog("Delete Template", $"Delete template '{entry.name}'?", "Yes", "Cancel"))
             {
-                if (EditorUtility.DisplayDialog("Delete Template", $"Delete template '{entry.name}'?", "Yes", "Cancel"))
+                var path = Path.Combine(_templatesFolder, $"{entry.name}.json");
+                File.Delete(path);
+                AssetDatabase.Refresh();
+                _entries.Remove(entry);
+                
+                if (_entries.Count == 0)
                 {
-                    var path = Path.Combine(_templatesFolder, $"{entry.name}.json");
-                    File.Delete(path);
-                    AssetDatabase.Refresh();
-                    _entries.Remove(entry);
-                    Repaint();
-                    return true;
+                    // Rebuild UI to show "no templates" message
+                    rootVisualElement.Clear();
+                    CreateGUI();
+                }
+                else
+                {
+                    BuildTemplateList();
                 }
             }
-
-            return false;
         }
     }
 }

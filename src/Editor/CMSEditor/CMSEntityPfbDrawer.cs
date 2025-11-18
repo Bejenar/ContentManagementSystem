@@ -1,30 +1,41 @@
 ﻿using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
+using UnityEditor.UIElements;
 
 namespace Editor.CMSEditor
 {
     [CustomPropertyDrawer(typeof(CMSEntityPfb), true)]
     public class CMSEntityPfbDrawer : PropertyDrawer
     {
-        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        public override VisualElement CreatePropertyGUI(SerializedProperty property)
         {
-            EditorGUI.BeginProperty(position, label, property);
+            var container = new VisualElement();
+            container.style.flexDirection = FlexDirection.Row;
+            container.style.alignItems = Align.Center;
 
             var objRef = property.objectReferenceValue as CMSEntityPfb;
-            var labelRect = new Rect(position.x, position.y, EditorGUIUtility.labelWidth, position.height);
-            var fieldRect = new Rect(position.x + EditorGUIUtility.labelWidth, position.y, position.width - EditorGUIUtility.labelWidth - 22f, position.height);
-            var buttonRect = new Rect(position.x + position.width - 20f, position.y, 20f, position.height);
 
-            EditorGUI.LabelField(labelRect, label);
+            // Label
+            var label = new Label(property.displayName);
+            label.style.minWidth = 120;
+            container.Add(label);
 
-            EditorGUI.BeginDisabledGroup(true);
-            EditorGUI.ObjectField(fieldRect, GUIContent.none, objRef, typeof(CMSEntityPfb), false);
-            EditorGUI.EndDisabledGroup();
-
-            if (GUI.Button(buttonRect, "\ud83d\uddc2\ufe0f"))
+            // Object field (disabled)
+            var objectField = new ObjectField
             {
-				var prefabs = AssetDatabase.FindAssets("t:GameObject", new[] { CMSPaths.CMSRoot });
+                objectType = typeof(CMSEntityPfb),
+                value = objRef
+            };
+            objectField.SetEnabled(false);
+            objectField.style.flexGrow = 1;
+            container.Add(objectField);
+
+            // Selector button
+            var selectorButton = new Button(() =>
+            {
+                var prefabs = AssetDatabase.FindAssets("t:GameObject", new[] { CMSPaths.CMSRoot });
                 var allPrefabs = prefabs
                     .Select(guid => AssetDatabase.GUIDToAssetPath(guid))
                     .Select(path => AssetDatabase.LoadAssetAtPath<GameObject>(path))
@@ -37,10 +48,16 @@ namespace Editor.CMSEditor
                 {
                     property.objectReferenceValue = selected;
                     property.serializedObject.ApplyModifiedProperties();
+                    objectField.value = selected;
                 });
-            }
+            })
+            {
+                text = "🗂️"
+            };
+            selectorButton.style.width = 22;
+            container.Add(selectorButton);
 
-            EditorGUI.EndProperty();
+            return container;
         }
     }
 }

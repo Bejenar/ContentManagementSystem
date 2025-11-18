@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="True">
+    <Style src="project://database/Assets/_Project/Packages/src/Editor/CMSEditor/Resources/CMSEditorStyles.uss?fileID=7433441132597879392&amp;guid=PLACEHOLDER&amp;type=3#CMSEditorStyles" />
+    <ui:VisualElement name="root" class="cms-inspector-container" style="flex-grow: 1;">
+        <ui:ScrollView name="scroll-view" style="flex-grow: 1;">
+            <ui:VisualElement name="inspector-content" />
+        </ui:ScrollView>
+    </ui:VisualElement>
+</ui:UXML>
+

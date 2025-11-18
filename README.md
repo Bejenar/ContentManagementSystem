@@ -2,13 +2,18 @@
 A modular and lightweight Content Management System designed for Unity projects. This plugin enables developers to define, visualize, and edit structured game data directly within the Unity Editor through a clean and customizable interface.
 Based on [XK's repository](https://github.com/koster/CMS), with bug fixes and an explorer implementation.
 
+## ✨ New: UI Toolkit Migration (v2.0)
+The CMSEditor has been fully migrated from IMGUI to **UI Toolkit** for improved performance and modern Unity compatibility. See `src/Editor/CMSEditor/MIGRATION_SUMMARY.md` for details.
+
 ## Features
 * Entity-based architecture to define reusable and editable data assets
+* **Modern UI Toolkit interface** for better performance and customization
 * Custom Editor windows for data selection, visualization, and editing
 * Flexible structure to support different content types (e.g. characters, items, dialogues)
 * Search and filtering tools for quickly locating specific entries
 * Well-organized runtime and editor separation (Runtime/, Editor/)
 * Navigation on CMSEntityPfb searching
+* **Unity 2021.3+ compatible**
   
 ![image](https://github.com/user-attachments/assets/5eb44be3-80a9-4a54-8382-9f50db7a0fd8)
 ![image](https://github.com/user-attachments/assets/b1ce5a48-a714-4e07-90f4-478eca409684)

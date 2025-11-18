@@ -1,0 +1,12 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="True">
+    <Style src="project://database/Assets/_Project/Packages/src/Editor/CMSEditor/Resources/CMSEditorStyles.uss?fileID=7433441132597879392&amp;guid=PLACEHOLDER&amp;type=3#CMSEditorStyles" />
+    <ui:VisualElement name="root" class="template-popup-content" style="padding: 10px;">
+        <ui:Label text="Template Name:" name="label-title" class="cms-section-header" />
+        <ui:TextField name="template-name-field" value="NewTemplate" />
+        <ui:VisualElement name="buttons-container" class="template-popup-buttons">
+            <ui:Button text="Save" name="btn-save" class="template-popup-button" />
+            <ui:Button text="Cancel" name="btn-cancel" class="template-popup-button" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
+

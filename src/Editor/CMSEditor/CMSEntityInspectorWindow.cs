@@ -1,6 +1,9 @@
 ﻿using Editor.CMSEditor;
+using src.Editor.CMSEditor.Utils;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
+using UnityEditor.UIElements;
 
 namespace src.Editor.CMSEditor
 {
@@ -9,7 +12,7 @@ namespace src.Editor.CMSEditor
         private Object _target;
         private CMSEntityExplorer _explorer;
         private int _selectedId;
-        private Vector2 _scrollPosition;
+        private VisualElement _inspectorContent;
         
         public static void ShowWindow(Object target, Rect anchorRect, CMSEntityExplorer explorer, int selectedId)
         {
@@ -23,29 +26,49 @@ namespace src.Editor.CMSEditor
             window.Focus();
         }
 
-        private void OnGUI()
+        private void CreateGUI()
         {
+            var root = rootVisualElement;
+            
+            // Load UXML
+            var visualTree = EditorCustomTools.LoadUXML("CMSEntityInspectorWindow");
+            root.Add(visualTree);
+            
+            // Load stylesheet
+            EditorCustomTools.LoadAndApplyStyleSheet(root, "CMSEditorStyles");
+
+            // Get reference to inspector content
+            _inspectorContent = root.Q<VisualElement>("inspector-content");
+
+            // Handle Escape key to close
+            root.RegisterCallback<KeyDownEvent>(evt =>
+            {
+                if (evt.keyCode == KeyCode.Escape)
+                {
+                    Close();
+                    evt.StopPropagation();
+                }
+            });
+
+            // Build the inspector
+            BuildInspector();
+        }
+
+        private void BuildInspector()
+        {
+            _inspectorContent.Clear();
+
             if (_target == null)
             {
-                EditorGUILayout.HelpBox("No target to inspect.", MessageType.Warning);
+                var helpBox = new HelpBox("No target to inspect.", HelpBoxMessageType.Warning);
+                _inspectorContent.Add(helpBox);
                 return;
             }
 
-            var e = Event.current;
-            if (e.type == EventType.KeyDown && e.keyCode == KeyCode.Escape)
-            {
-                Close();
-                GUIUtility.ExitGUI();
-                return;
-            }
-
-            _scrollPosition = EditorGUILayout.BeginScrollView(_scrollPosition);
-    
-            EditorGUI.indentLevel = 0;
+            // Create an InspectorElement to display the target's inspector
             var editor = UnityEditor.Editor.CreateEditor(_target);
-            editor.OnInspectorGUI();
-            
-            EditorGUILayout.EndScrollView();
+            var inspectorElement = new InspectorElement(editor);
+            _inspectorContent.Add(inspectorElement);
         }
         
         private void OnDestroy()

@@ -1,19 +1,23 @@
 ﻿using UnityEditor;
-using UnityEngine;
+using UnityEngine.UIElements;
+using UnityEditor.UIElements;
 
 namespace Editor.CMSEditor
 {
     [CustomPropertyDrawer(typeof(EntityComponentDefinition), true)]
     public class EntityComponentDefinitionDrawer : PropertyDrawer
     {
-        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        public override VisualElement CreatePropertyGUI(SerializedProperty property)
         {
-            return EditorGUI.GetPropertyHeight(property, label, true);
-        }
-
-        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
-        {
-            EditorGUI.PropertyField(position, property, true);
+            var container = new VisualElement();
+            
+            // Create a property field that will automatically display all child properties
+            var propertyField = new PropertyField(property);
+            propertyField.BindProperty(property);
+            
+            container.Add(propertyField);
+            
+            return container;
         }
     }
 }
